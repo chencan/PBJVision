@@ -1326,6 +1326,10 @@ typedef void (^PBJVisionBlock)();
     return [_currentDevice isAdjustingFocus];
 }
 
+- (CGPoint)adjustedPoint {
+    return _currentDevice.focusPointOfInterest;
+}
+
 - (void)exposeAtAdjustedPointOfInterest:(CGPoint)adjustedPoint
 {
     if ([_currentDevice isAdjustingExposure])
