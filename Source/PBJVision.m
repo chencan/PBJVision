@@ -1358,23 +1358,17 @@ typedef void (^PBJVisionBlock)();
 
 - (void)_adjustFocusExposureAndWhiteBalance
 {
-    if ([_currentDevice isAdjustingFocus] || [_currentDevice isAdjustingExposure])
-        return;
-
     // only notify clients when focus is triggered from an event
     if ([_delegate respondsToSelector:@selector(visionWillStartFocus:)])
         [_delegate visionWillStartFocus:self];
 
     CGPoint focusPoint = CGPointMake(0.5f, 0.5f);
-    [self focusAtAdjustedPointOfInterest:focusPoint];
+    [self focusExposeAndAdjustWhiteBalanceAtAdjustedPoint:focusPoint];
 }
 
 // focusExposeAndAdjustWhiteBalanceAtAdjustedPoint: will put focus and exposure into auto
 - (void)focusExposeAndAdjustWhiteBalanceAtAdjustedPoint:(CGPoint)adjustedPoint
 {
-    if ([_currentDevice isAdjustingFocus] || [_currentDevice isAdjustingExposure])
-        return;
-
     NSError *error = nil;
     if ([_currentDevice lockForConfiguration:&error]) {
     
