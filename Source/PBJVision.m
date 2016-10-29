@@ -2215,6 +2215,7 @@ typedef void (^PBJVisionBlock)();
         
             // process the sample buffer for rendering onion layer or capturing video photo
             if ( (_flags.videoRenderingEnabled || _flags.videoCaptureFrame) && _flags.videoWritten) {
+                CFRetain(bufferToWrite);
                 [self _executeBlockOnMainQueue:^{
                     [self _processSampleBuffer:bufferToWrite];
                     
@@ -2224,27 +2225,36 @@ typedef void (^PBJVisionBlock)();
                         [self _capturePhotoFromSampleBuffer:bufferToWrite];
                         [self _didCapturePhoto];
                     }
+                    if (bufferToWrite) {
+                        CFRelease(bufferToWrite);
+                    }
                 }];
             }
             
-            [self _enqueueBlockOnMainQueue:^{
-                if ([_delegate respondsToSelector:@selector(vision:didCaptureVideoSampleBuffer:)]) {
+            if ([_delegate respondsToSelector:@selector(vision:didCaptureVideoSampleBuffer:)]) {
+                CFRetain(bufferToWrite);
+                [self _enqueueBlockOnMainQueue:^{
                     [_delegate vision:self didCaptureVideoSampleBuffer:bufferToWrite];
-                }
-            }];
+                    if (bufferToWrite) {
+                        CFRelease(bufferToWrite);
+                    }
+                }];
+            }
         
         } else if (!isVideo && _flags.videoWritten) {
             
             [_mediaWriter writeSampleBuffer:bufferToWrite withMediaTypeVideo:isVideo];
-            
-            [self _enqueueBlockOnMainQueue:^{
-                if ([_delegate respondsToSelector:@selector(vision:didCaptureAudioSample:)]) {
+
+            if ([_delegate respondsToSelector:@selector(vision:didCaptureAudioSample:)]) {
+                CFRetain(bufferToWrite);
+                [self _enqueueBlockOnMainQueue:^{
                     [_delegate vision:self didCaptureAudioSample:bufferToWrite];
-                }
-            }];
-        
+                    if (bufferToWrite) {
+                        CFRelease(bufferToWrite);
+                    }
+                }];
+            }
         }
-    
     }
     
     [self _automaticallyEndCaptureIfMaximumDurationReachedWithSampleBuffer:sampleBuffer];
